@@ -1,4 +1,3 @@
-import {} from "duck-query"
 
 export default function App() {
     return (
