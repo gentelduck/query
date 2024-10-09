@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.1.8
+
+### Patch Changes
+
+- 3dda178: added declare duck query to fix import bug
+
 ## 0.1.7
 
 ### Patch Changes

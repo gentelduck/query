@@ -1,6 +1,5 @@
-import { } from "duck-query"
+import {  } from "duck-query"
 export default function App() {
-
     return (
         <div>App</div>
     )
