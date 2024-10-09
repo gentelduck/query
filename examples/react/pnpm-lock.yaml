@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       duck-query:
-        specifier: ^0.1.6
-        version: 0.1.6
+        specifier: ^0.1.7
+        version: 0.1.7
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -556,8 +556,8 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
-  duck-query@0.1.6:
-    resolution: {integrity: sha512-PKQFXJVraDygB+VMb8RGxP1vLS4BsLZ/6KixJibX+CdY5/y+5Rq9ARhENXtfRFqZXPBXlNIi2YDu8941j2GE7w==}
+  duck-query@0.1.7:
+    resolution: {integrity: sha512-Gob3RtxXB58hEcOktxB82OCRCCAdRFovMYAcn5HN0kxEbydTXwohhj3SQ2CY/6MmGGHQcKOcxRQD90547I3+3A==}
 
   esbuild@0.21.5:
     resolution: {integrity: sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==}
@@ -1347,7 +1347,7 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  duck-query@0.1.6:
+  duck-query@0.1.7:
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
