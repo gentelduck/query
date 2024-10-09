@@ -7,10 +7,12 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "declaration": true,          // Enable declaration file generation
-    "declarationDir": "./dist/types", // Specify output directory for types
-    "outDir": "./dist",            // Specify output directory for JS files
-    "rootDir": "./packages"             // Specify the root directory for the input files
+    "declaration": true,          
+    "declarationDir": "./dist/types",
+    "outDir": "./dist",            
+    "rootDir": "./packages",
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true
   },
   "include": ["packages/**/*"],
   "exclude": ["node_modules", "dist"],
