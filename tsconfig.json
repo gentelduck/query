@@ -1,19 +1,23 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "jsx": "react",
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "declaration": true,          
-    "declarationDir": "./dist/types",
-    "outDir": "./dist",            
-    "rootDir": "./packages",
-    "noUncheckedIndexedAccess": true,
-    "noEmit": true
+    "target": "ESNext",                   // Specify ECMAScript target version
+    "module": "ESNext",                   // Specify module code generation
+    "jsx": "react",                       // Specify JSX code generation
+    "strict": true,                       // Enable all strict type-checking options
+    "moduleResolution": "node",           // Use Node.js-style module resolution
+    "esModuleInterop": true,              // Enables emit interoperability between CommonJS and ES Modules
+    "skipLibCheck": true,                 // Skip type checking of declaration files
+    "declaration": true,                   // Generates corresponding '.d.ts' file
+    "declarationDir": "./dist/types",     // Output directory for generated declaration files
+    "outDir": "./dist",                   // Redirect output structure to the 'dist' directory
+    "rootDir": "./packages",              // Specify the root directory of input files
+    "noUncheckedIndexedAccess": true,      // Enable error reporting for indexed access to objects
+    "noEmit": false,                      // Set to false to enable emitting outputs
+    "typeRoots": [
+      "./node_modules/@types",             // Default types directory
+      "./@types"                           // Custom types directory for local declarations
+    ]
   },
-  "include": ["packages/**/*"],
-  "exclude": ["node_modules", "dist"],
+  "include": ["packages/**/*", "@types/**/*"],  // Include all files in packages and custom types
+  "exclude": ["node_modules", "dist"]         // Exclude the node_modules and dist directories
 }

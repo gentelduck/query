@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "duck-query": "^0.1.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
