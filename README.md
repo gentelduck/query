@@ -15,13 +15,19 @@ You can install `duck-query` using various package managers:
 npm install duck-query
 ```
 
+### pnpm
+
 ```bash
 pnpm add duck-query
 ```
 
+### bun
+
 ```bash
 bun add duck-query
 ```
+
+### yarn
 
 ```bash
 yarn add duck-query
