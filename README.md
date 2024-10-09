@@ -13,7 +13,16 @@ You can install `duck-query` using various package managers:
 
 ```bash
 npm install duck-query
+```
+
+```bash
 pnpm add duck-query
+```
+
+```bash
 bun add duck-query
+```
+
+```bash
 yarn add duck-query
 ```
