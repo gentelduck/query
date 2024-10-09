@@ -1,0 +1,1 @@
+export { useQueryNew } from "./duck-query/useQuery"

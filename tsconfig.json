@@ -1,7 +1,17 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,          // Enable declaration file generation
+    "declarationDir": "./dist/types", // Specify output directory for types
+    "outDir": "./dist",            // Specify output directory for JS files
+    "rootDir": "./packages"             // Specify the root directory for the input files
+  },
+  "include": ["packages/**/*"],
+  "exclude": ["node_modules", "dist"],
 }

@@ -13,6 +13,7 @@ type CacheEntry<T> = {
     timestamp: number;
 };
 
+// global cache cuz when i add it inside the hook it will rebuild everytime cuz the component destroys every hook when unmount
 const cache: Record<string, CacheEntry<unknown>> = {};
 
 export function useQueryNew<T>({ queryKey, queryFn, staleTime = 0, refetchInterval = 0 }: Query<T>) {
@@ -51,7 +52,7 @@ export function useQueryNew<T>({ queryKey, queryFn, staleTime = 0, refetchInterv
             }, refetchInterval);
         }
 
-        if (cachedData && !isStale) {
+        if (key in cache && cachedData && !isStale) {
             setData(cachedData.data as T);
             return;
         }
