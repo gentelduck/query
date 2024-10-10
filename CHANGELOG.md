@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.6.0
+
+### Minor Changes
+
+- added retry enhanced the code
+
 ## 0.5.6
 
 ### Patch Changes
