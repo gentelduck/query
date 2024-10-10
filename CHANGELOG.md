@@ -1,5 +1,12 @@
 # duck-query
 
+## 0.1.9
+
+### Patch Changes
+
+- f0866f0: fix the md to be more readable
+- 96de2bd: fix path fromn src/index.d.ts to dist/index.d.ts
+
 ## 0.1.8
 
 ### Patch Changes

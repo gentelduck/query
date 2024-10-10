@@ -21,7 +21,7 @@ export default function Header() {
             <ul>
                 {
                     LINKS.map((link) => {
-                        return <li className="text-white capitalize text-[1.6rem]">
+                        return <li className="text-white capitalize text-[1.6rem] underline">
                             <Link to={link.to}>{link.name}</Link>
                         </li>
                     })
