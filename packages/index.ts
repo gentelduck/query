@@ -1,1 +1,1 @@
-export { useQueryNew } from "./duck-query/useQuery";
+export * from "./duck-query/src"

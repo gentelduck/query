@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.3.0
+
+### Minor Changes
+
+- added refetchOnWindowFocus - gcTime
+
 ## 0.1.9
 
 ### Patch Changes
