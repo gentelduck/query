@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.7.0
+
+### Minor Changes
+
+- added offline support
+
 ## 0.6.3
 
 ### Patch Changes
