@@ -135,7 +135,7 @@ export function useQueryNew<T>({
             if (staleCheckRef.current) clearInterval(staleCheckRef.current);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [key, staleTime, refetchInterval, gcTime]);
+    }, [key, staleTime, refetchInterval, gcTime, enabled]);
 
     return {
         data,

@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.5.1
+
+### Patch Changes
+
+- fix enabled doesn't fetch data after it becomes true
+
 ## 0.3.0
 
 ### Minor Changes
