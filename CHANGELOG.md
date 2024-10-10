@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.6.3
+
+### Patch Changes
+
+- fix retry error
+
 ## 0.6.2
 
 ### Patch Changes
