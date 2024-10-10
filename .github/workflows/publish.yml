@@ -22,7 +22,7 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            # if i have tests i will uncomment it
+            # Uncomment if you have tests
             # - name: Run tests
             #   run: npm test
 
@@ -35,3 +35,15 @@ jobs:
               run: |
                   npx changeset version  # Version packages based on changesets
                   npm publish  # Publish the packages to npm
+
+            - name: Create GitHub Release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHU_TOKEN }}
+              with:
+                  tag_name: v${{ steps.set_version.outputs.new_version }}
+                  release_name: Release v${{ steps.set_version.outputs.new_version }}
+                  body: |
+                      New release based on changesets.
+                  draft: false
+                  prerelease: false

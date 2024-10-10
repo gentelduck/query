@@ -7,6 +7,7 @@ type Query<T> = {
     refetchInterval?: number;
     refetchOnWindowFocus?: boolean;
     gcTime?: number;
+    enabled: boolean
 };
 
 type CacheEntry<T> = {
@@ -14,15 +15,23 @@ type CacheEntry<T> = {
     timestamp: number;
 };
 
+type FetchStatus = "fetching" | "idle" | "paused"
+
 type QueryOptions<T> = {
     data: T | null;
     isLoading: boolean;
     isError: boolean;
+    error: any;
     refetch: () => void;
+    isStale: boolean
+    isFetched: boolean
+    isSuccess: boolean
+    fetchStatus: FetchStatus
 };
 
-// global cache cuz when i add it inside the hook it will rebuild everytime cuz the component destroys every hook when unmount
 const cache: Record<string, CacheEntry<unknown>> = {};
+
+// TODO make paused after doing retries
 
 export function useQueryNew<T>({
     queryKey,
@@ -31,114 +40,112 @@ export function useQueryNew<T>({
     refetchInterval = 0,
     refetchOnWindowFocus = false,
     gcTime,
+    enabled = true
 }: Query<T>): QueryOptions<T> {
     const [data, setData] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
+    const [error, setError] = useState<any>(null)
+    const [isStale, setIsStale] = useState<boolean>(false)
+    const [isFetched, setIsFetched] = useState<boolean>(false)
+    const [isSuccess, setIsSuccess] = useState<boolean>(false)
+    const [fetchStatus, setFetchStatus] = useState<FetchStatus>("idle")
     const key = JSON.stringify(queryKey);
     const intervalRef = useRef<number | null>(null);
     const staleCheckRef = useRef<number | null>(null);
 
     const checkStale = () => {
         const cachedData = cache[key];
+
         if (cachedData && Date.now() - cachedData.timestamp > staleTime) {
             fetcher();
         }
     };
 
     const clearUnusedCache = (key: string, gcTime: number) => {
-        if (cache[key]) {
-            if (Date.now() - cache[key].timestamp > gcTime) {
-                delete cache[key];
-            }
+        if (gcTime && cache[key] && Date.now() - cache[key].timestamp > gcTime) {
+            delete cache[key];
         }
     };
 
     const fetcher = async () => {
+        if (!enabled) return;
         setIsLoading(true);
+        setFetchStatus("fetching")
         setIsError(false);
         try {
             const result = await queryFn();
-            setIsLoading(false);
-            cache[key] = {
-                data: result,
-                timestamp: Date.now(),
-            };
+            cache[key] = { data: result, timestamp: Date.now() };
             setData(result);
+            setIsSuccess(true)
         } catch (err) {
+            console.log(err)
             setIsError(true);
-            throw new Error(err as string);
+            setIsSuccess(false)
+            setError(err)
+            setFetchStatus("fetching")
         } finally {
             setIsLoading(false);
+            setIsFetched(true)
+            setFetchStatus("idle")
         }
     };
 
-    const refetch = () => {
-        fetcher();
-    };
+    const refetch = () => fetcher();
 
     useEffect(() => {
         if (refetchOnWindowFocus) {
             const handleVisibilityChange = () => {
                 const cachedData = cache[key];
                 const isStale = !cachedData || (Date.now() - cachedData.timestamp > staleTime);
-
                 if (document.visibilityState === "visible" && isStale) {
                     fetcher();
                 }
             };
-
             document.addEventListener("visibilitychange", handleVisibilityChange);
-
-            return () => {
-                document.removeEventListener("visibilitychange", handleVisibilityChange);
-            };
+            return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [key, staleTime, queryFn, refetchOnWindowFocus]);
+    }, [key, staleTime, refetchOnWindowFocus]);
 
     useEffect(() => {
         const cachedData = cache[key];
         const isStale = cachedData && Date.now() - cachedData.timestamp > staleTime;
 
-        clearUnusedCache(key, gcTime as number);
+        if (gcTime) clearUnusedCache(key, gcTime);
 
-        if (staleTime > 0 && staleCheckRef.current === null) {
-            staleCheckRef.current = window.setInterval(() => {
-                checkStale();
-            }, staleTime);
+        if (staleTime > 0 && !staleCheckRef.current) {
+            staleCheckRef.current = window.setInterval(checkStale, staleTime);
         }
 
-        if (refetchInterval !== 0 && intervalRef.current === null) {
-            intervalRef.current = window.setInterval(() => {
-                fetcher();
-            }, refetchInterval);
+        if (refetchInterval > 0 && !intervalRef.current) {
+            intervalRef.current = window.setInterval(fetcher, refetchInterval);
         }
 
         if (cachedData && !isStale) {
             setData(cachedData.data as T);
-            return;
+            setIsStale(true)
+        } else {
+            fetcher();
+            setIsStale(false)
         }
 
-        fetcher();
-
         return () => {
-            if (intervalRef.current !== null) {
-                clearInterval(intervalRef.current);
-            }
-            if (staleCheckRef.current !== null) {
-                clearInterval(staleCheckRef.current);
-            }
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (staleCheckRef.current) clearInterval(staleCheckRef.current);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key, staleTime, refetchInterval, gcTime]);
-
-
 
     return {
         data,
         isLoading,
         isError,
         refetch,
+        error,
+        isStale,
+        isFetched,
+        isSuccess,
+        fetchStatus
     };
 }
