@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 
+type DeepQueryKey = string | { [key: string]: any } | DeepQueryKey[];
+
 type Query<T> = {
-	queryKey: string;
-	queryFn: () => Promise<T>;
+	queryKey: DeepQueryKey[];
+	queryFn: (...args: any[]) => Promise<T>;
 	staleTime?: number;
 	refetchInterval?: number;
 	refetchOnWindowFocus?: boolean;
@@ -101,7 +103,7 @@ export function useQueryNew<T>({
 	gcTime,
 	enabled = true,
 	retry = 4,
-	retryDelay = 2000,
+	retryDelay = 3500,
 	initialData,
 }: Query<T>): QueryOptions<T> {
 	const [queryState, setQueryState] = useState({
@@ -115,11 +117,14 @@ export function useQueryNew<T>({
 		fetchStatus: "idle" as FetchStatus,
 	});
 
-	const key = useMemo(() => queryKey, [queryKey]);
+	const key = useMemo(() => queryKey[0], [queryKey]) as string;
+	const params = useMemo(() => queryKey[1], [queryKey])
 	const intervalRef = useRef<number | null>(null);
 	const staleCheckRef = useRef<number | null>(null);
 	const retriesRef = useRef(0);
 	const retriesIntervalRef = useRef<NodeJS.Timeout | null>(null);
+	const queryKeyParam = [key, params]
+
 
 	const fetcher = useCallback(async () => {
 		const isStale = !cache[key] || Date.now() - cache[key]?.timestamp > staleTime;
@@ -150,7 +155,7 @@ export function useQueryNew<T>({
 		}));
 
 		try {
-			const result = await queryFn();
+			const result = await queryFn({ queryKey: queryKeyParam });
 			const cacheEntry = { data: result, timestamp: Date.now() };
 
 			const cachedData = cache[key] || (await loadCacheFromIndexedDB<T>(key));

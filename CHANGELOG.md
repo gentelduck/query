@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.8.0
+
+### Minor Changes
+
+- added query key params
+
 ## 0.7.0
 
 ### Minor Changes
