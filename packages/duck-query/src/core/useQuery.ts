@@ -80,7 +80,7 @@ export function useQueryNew<T>({
         try {
             const result = await queryFn();
             cache[key] = { data: result, timestamp: Date.now() };
-            setData(result);
+            if (isLoading) setData(result);
             setIsSuccess(true)
         } catch (err) {
             console.log(err)

@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.5.5
+
+### Patch Changes
+
+- fix the data is set before loading
+
 ## 0.5.4
 
 ### Patch Changes
