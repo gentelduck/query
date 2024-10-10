@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.5.6
+
+### Patch Changes
+
+- fix data is null even there's loading
+
 ## 0.5.5
 
 ### Patch Changes

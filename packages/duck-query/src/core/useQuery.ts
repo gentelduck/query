@@ -42,7 +42,7 @@ export function useQueryNew<T>({
     gcTime,
     enabled = true
 }: Query<T>): QueryOptions<T> {
-    const [data, setData] = useState<T | null>(null);
+    const [data, setData] = useState<T | null>({} as T);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
     const [error, setError] = useState<any>(null)
