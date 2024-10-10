@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.6.2
+
+### Patch Changes
+
+- fix type error
+
 ## 0.6.1
 
 ### Patch Changes
