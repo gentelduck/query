@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.6.1
+
+### Patch Changes
+
+- a71e2bb: fix infinite loop
+
 ## 0.6.0
 
 ### Minor Changes
