@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.5.4
+
+### Patch Changes
+
+- fix enabled doesn't cache and loading when the component re-renders
+
 ## 0.5.3
 
 ### Patch Changes
