@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.5.2
+
+### Patch Changes
+
+- fix refetchInterval problem
+
 ## 0.5.1
 
 ### Patch Changes

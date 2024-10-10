@@ -118,7 +118,7 @@ export function useQueryNew<T>({
             staleCheckRef.current = window.setInterval(checkStale, staleTime);
         }
 
-        if (refetchInterval > 0 && !intervalRef.current) {
+        if (refetchInterval > 0) {
             intervalRef.current = window.setInterval(fetcher, refetchInterval);
         }
 
