@@ -7,7 +7,7 @@ type Query<T> = {
     refetchInterval?: number;
     refetchOnWindowFocus?: boolean;
     gcTime?: number;
-    enabled: boolean
+    enabled?: boolean
 };
 
 type CacheEntry<T> = {
