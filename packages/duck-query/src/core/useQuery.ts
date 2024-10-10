@@ -7,7 +7,7 @@ type Query<T> = {
     refetchInterval?: number;
     refetchOnWindowFocus?: boolean;
     gcTime?: number;
-    enabled?: boolean
+    enabled?: boolean;
 };
 
 type CacheEntry<T> = {
@@ -15,7 +15,7 @@ type CacheEntry<T> = {
     timestamp: number;
 };
 
-type FetchStatus = "fetching" | "idle" | "paused"
+type FetchStatus = "fetching" | "idle" | "paused";
 
 type QueryOptions<T> = {
     data: T | null;
@@ -23,15 +23,13 @@ type QueryOptions<T> = {
     isError: boolean;
     error: any;
     refetch: () => void;
-    isStale: boolean
-    isFetched: boolean
-    isSuccess: boolean
-    fetchStatus: FetchStatus
+    isStale: boolean;
+    isFetched: boolean;
+    isSuccess: boolean;
+    fetchStatus: FetchStatus;
 };
 
 const cache: Record<string, CacheEntry<unknown>> = {};
-
-// TODO make paused after doing retries
 
 export function useQueryNew<T>({
     queryKey,
@@ -45,18 +43,17 @@ export function useQueryNew<T>({
     const [data, setData] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
-    const [error, setError] = useState<any>(null)
-    const [isStale, setIsStale] = useState<boolean>(false)
-    const [isFetched, setIsFetched] = useState<boolean>(false)
-    const [isSuccess, setIsSuccess] = useState<boolean>(false)
-    const [fetchStatus, setFetchStatus] = useState<FetchStatus>("idle")
+    const [error, setError] = useState<any>(null);
+    const [isStale, setIsStale] = useState<boolean>(false);
+    const [isFetched, setIsFetched] = useState<boolean>(false);
+    const [isSuccess, setIsSuccess] = useState<boolean>(false);
+    const [fetchStatus, setFetchStatus] = useState<FetchStatus>("idle");
     const key = JSON.stringify(queryKey);
     const intervalRef = useRef<number | null>(null);
     const staleCheckRef = useRef<number | null>(null);
 
     const checkStale = () => {
         const cachedData = cache[key];
-
         if (cachedData && Date.now() - cachedData.timestamp > staleTime) {
             fetcher();
         }
@@ -70,24 +67,36 @@ export function useQueryNew<T>({
 
     const fetcher = async () => {
         if (!enabled) return;
-        setIsLoading(true);
-        setFetchStatus("fetching")
+
+        const cachedData = cache[key];
+
+        if (!cachedData || Date.now() - cachedData.timestamp > staleTime) {
+            setIsLoading(true);
+            setFetchStatus("fetching");
+        }
         setIsError(false);
+
         try {
             const result = await queryFn();
+
+            if (JSON.stringify(cachedData?.data) === JSON.stringify(result)) {
+                setIsSuccess(true);
+                setFetchStatus("idle");
+                setIsLoading(false);
+                return;
+            }
+
             cache[key] = { data: result, timestamp: Date.now() };
             setData(result);
-            setIsSuccess(true)
+            setIsSuccess(true);
         } catch (err) {
-            console.log(err)
             setIsError(true);
-            setIsSuccess(false)
-            setError(err)
-            setFetchStatus("fetching")
+            setError(err);
+            setIsSuccess(false);
         } finally {
+            setIsFetched(true);
+            setFetchStatus("idle");
             setIsLoading(false);
-            setIsFetched(true)
-            setFetchStatus("idle")
         }
     };
 
@@ -105,7 +114,7 @@ export function useQueryNew<T>({
             document.addEventListener("visibilitychange", handleVisibilityChange);
             return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key, staleTime, refetchOnWindowFocus]);
 
     useEffect(() => {
@@ -124,17 +133,19 @@ export function useQueryNew<T>({
 
         if (cachedData && !isStale) {
             setData(cachedData.data as T);
-            setIsStale(true)
+            setIsLoading(false);
+            setIsStale(false);
         } else {
+            setIsLoading(true);
             fetcher();
-            setIsStale(false)
+            setIsStale(true);
         }
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
             if (staleCheckRef.current) clearInterval(staleCheckRef.current);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key, staleTime, refetchInterval, gcTime, enabled]);
 
     return {

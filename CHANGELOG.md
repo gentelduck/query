@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.5.3
+
+### Patch Changes
+
+- fix loading triggers even it's cached
+
 ## 0.5.2
 
 ### Patch Changes
