@@ -1,4 +1,4 @@
-# Duck Query ![Database Icon](https://img.icons8.com/ios-filled/50/000000/database.png)
+# Duck Query ![Database Icon](https://cdn-icons-png.freepik.com/512/603/603192.png)
 
 [![NPM version](https://img.shields.io/npm/v/duck-query.svg?style=flat)](https://www.npmjs.com/package/duck-query)  
 [![License](https://img.shields.io/npm/l/duck-query)](https://www.npmjs.com/package/duck-query)  
