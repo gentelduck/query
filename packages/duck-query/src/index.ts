@@ -1,1 +1,2 @@
-export * from "./core/useQuery"
+export * from "./core/useQueryNew"
+export { useQueryClient } from "./core/QueryClientProvider"

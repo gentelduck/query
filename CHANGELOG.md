@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.10.0
+
+### Minor Changes
+
+- refactor useQueryNew and added invalidateQueries andf added query observer (using context API) and removed some old features (will be added later)
+
 ## 0.8.0
 
 ### Minor Changes

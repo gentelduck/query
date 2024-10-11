@@ -11,7 +11,6 @@ export default function TodosPage() {
         staleTime: 10000,
     })
 
-    console.log(isError)
     if (isError) return <h1 className="text-white">Error!</h1>
     if (isLoading) return <div className="text-white grid grid-cols-4 max-lg:grid-cols-1 gap-4">
         {
