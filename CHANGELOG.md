@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.11.0
+
+### Minor Changes
+
+- cd50052: added observer and QueryClient and code refactor and refetchOnWindow focus and added arguments sharing (you can share arguments through the query with the same key) added revalidating it will it will revalidate the query depends on the key
+
 ## 0.10.0
 
 ### Minor Changes
