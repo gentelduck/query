@@ -1,3 +1,4 @@
 export * from "./useQueryNew"
-export { QueryClientProvider, QueryClient } from "./QueryClientProvider"
+export { QueryClientProvider } from "./QueryClientProvider"
 export { useQueryClient } from "./observerSubscriptions"
+export { QueryClient } from "./QueryClient"
