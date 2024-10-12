@@ -1,4 +1,4 @@
-# Duck Query ![duck icon]("./media/logo.png")
+# Duck Query ![duck icon](./media/logo.png)
 
 [![NPM version](https://img.shields.io/npm/v/duck-query.svg?style=flat)](https://www.npmjs.com/package/duck-query)  
 [![License](https://img.shields.io/npm/l/duck-query)](https://www.npmjs.com/package/duck-query)  
