@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.11.4
+
+### Patch Changes
+
+- f9fa40a: fix QueryClient import changed errors in observers
+
 ## 0.11.3
 
 ### Patch Changes
