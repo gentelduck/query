@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.11.1
+
+### Patch Changes
+
+- 0fba9a8: fix the logo.png in read me
+
 ## 0.11.0
 
 ### Minor Changes
