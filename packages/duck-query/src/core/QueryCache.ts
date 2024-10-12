@@ -1,32 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-
-export type CacheEntry<T> = {
-    result?: T;
+export type CacheEntry = {
+    result?: any;
     timestamp?: number;
-    promise?: Promise<T>;
-    queryFn?: (...args: any[]) => Promise<T>
-}
+    promise?: Promise<any>;
+    queryFn?: (...args: any[]) => Promise<any>;
+    args?: any[];
+};
 
-interface QueryCacheType<T> {
-    get(key: string): CacheEntry<T> | null;
-    set(key: string, value: CacheEntry<T>): void;
-    delete(key: string, gcTime: number): void;
+interface QueryCacheType {
+    get(key: string): CacheEntry | null;
+    build(key: string, value: CacheEntry): void;
+    remove(key: string, gcTime: number): void;
     clear(): void;
 }
 
-export class QueryCache<T> implements QueryCacheType<T> {
-    private queries: Map<string, CacheEntry<T>> = new Map();
+export class QueryCache implements QueryCacheType {
+    private queries: Map<string, CacheEntry> = new Map();
 
-    public get(key: string): CacheEntry<T> | null {
+    public get(key: string): CacheEntry | null {
         return this.queries.get(key) || null;
     }
 
-    public set(key: string, value: CacheEntry<T>) {
+    public build(key: string, value: CacheEntry) {
         this.queries.set(key, value);
     }
 
-    public delete(key: string, gcTime: number) {
+    public remove(key: string, gcTime: number) {
         const entry = this.queries.get(key);
         if (entry && Date.now() - entry.timestamp! > gcTime) {
             this.queries.delete(key);

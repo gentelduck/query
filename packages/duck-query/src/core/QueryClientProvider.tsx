@@ -1,59 +1,65 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useContext, createContext, useState } from "react";
 import { CacheEntry, QueryCache } from "./QueryCache";
+import { QueryKey } from "./useQueryNew";
+import { QueryClientConfig } from "./QueryClient";
 
-
-type QueryClient = {
-    invalidateQueries: ({ queryKey }: { queryKey: string[] }) => void;
+export type QueryClient = {
+    invalidateQueries: ({ queryKey }: { queryKey: QueryKey }) => void;
 };
 
 export interface FullQueryClient extends QueryClient {
     data: any;
     setData: (queryKey: string, result: any) => void;
-    invalidateQueries: ({ queryKey }: { queryKey: string[] }) => void;
-    queryCache: QueryCache<any>;
+    invalidateQueries: ({ queryKey }: { queryKey: QueryKey }) => void;
+    queryCache: QueryCache;
 }
 
-interface QueryClientProviderProps {
+export interface QueryClientProviderProps {
     children?: React.ReactNode;
+    client: QueryClientConfig
 }
 
-const QueryClientContext = createContext<QueryClient | undefined>(undefined);
-
+export const QueryClientContext = createContext<QueryClient | undefined>(undefined);
 export const FullQueryClientContext = createContext<FullQueryClient | undefined>(undefined);
-const queryCache = new QueryCache<any>();
 
-export function QueryClientProvider({ children }: QueryClientProviderProps) {
+
+export function QueryClientProvider({ children, client }: QueryClientProviderProps) {
+
+    if (!client) throw new Error("No QueryClient set, use QueryClientProvider to set one")
+
     const [data, setQueryData] = useState({});
 
+    const queryCache = client.queryCache
 
-    const setData = (queryKey: string, cachedEntry: CacheEntry<any>) => {
-        const cacheEntry: CacheEntry<any> = {
+    const setData = (queryKey: string, cachedEntry: CacheEntry) => {
+        setQueryData(prev => ({ ...prev, [queryKey]: cachedEntry.result }));
+        queryCache.build(queryKey, {
             result: cachedEntry.result,
             timestamp: Date.now(),
             queryFn: cachedEntry.queryFn,
-        };
-        setQueryData(prev => ({ ...prev, [queryKey]: cachedEntry.result }));
-        queryCache.set(queryKey, cacheEntry);
-    };
-
-    const invalidateQueries = ({ queryKey }: { queryKey?: string[] } = { queryKey: [] }) => {
-        if (queryKey?.length === 0) {
-            return;
-        }
-        queryKey?.forEach(key => {
-            const queryFn = queryCache.get(key)?.queryFn;
-
-            queryCache.delete(key, 0);
-            if (queryFn) {
-                queryFn().then(res => {
-                    setQueryData(prev => ({ ...prev, [key]: res }))
-                    queryCache.set(key, { result: res, queryFn, timestamp: Date.now() });
-                });
-            }
+            args: cachedEntry.args
         });
     };
 
+    const invalidateQueries = ({ queryKey }: { queryKey?: QueryKey } = { queryKey: [] }) => {
+        if (!queryKey || queryKey.length === 0) {
+            return;
+        }
+        queryKey.forEach(key => {
+            const cachedEntry = queryCache.get(key as string);
+            const queryFn = cachedEntry?.queryFn;
+
+            if (queryFn && queryKey && typeof queryFn === "function") {
+                queryFn({ queryKey }).then(res => {
+                    setQueryData(prev => ({ ...prev, [key as string]: res }));
+                    queryCache.build(key as string, { result: res, queryFn, args: queryKey as any, timestamp: Date.now() });
+                });
+            }
+
+            queryCache.remove(queryKey[0] as string, 0)
+        });
+    };
 
     const fullQueryClient: FullQueryClient = {
         data,
@@ -61,6 +67,7 @@ export function QueryClientProvider({ children }: QueryClientProviderProps) {
         invalidateQueries,
         queryCache
     };
+
     return (
         <QueryClientContext.Provider value={{ invalidateQueries }}>
             <FullQueryClientContext.Provider value={fullQueryClient}>
@@ -70,22 +77,3 @@ export function QueryClientProvider({ children }: QueryClientProviderProps) {
     );
 }
 
-export const useQueryClient = (): QueryClient => {
-    const context = useContext(QueryClientContext);
-
-    if (!context) {
-        throw new Error("useQueryClient must be used within a QueryClientProvider");
-    }
-
-    return context;
-};
-
-export const useFullQueryClient = (): FullQueryClient => {
-    const context = useContext(FullQueryClientContext);
-
-    if (!context) {
-        throw new Error("useFullQueryClient must be used within a QueryClientProvider");
-    }
-
-    return context;
-};
