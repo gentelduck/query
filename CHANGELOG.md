@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.11.3
+
+### Patch Changes
+
+- c0d0bf8: fix: logo in read me and centerd it
+
 ## 0.11.2
 
 ### Patch Changes
