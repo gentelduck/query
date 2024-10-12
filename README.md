@@ -1,4 +1,9 @@
-# Duck Query <img src="./media/logo.png" alt="duck icon" width="100" height="100">
+# Duck Query
+
+<p align="center">
+  <img src="./media/logo.png" alt="Duck query Logo" width="200"/>
+</p>
+
 
 [![NPM version](https://img.shields.io/npm/v/duck-query.svg?style=flat)](https://www.npmjs.com/package/duck-query)  
 [![License](https://img.shields.io/npm/l/duck-query)](https://www.npmjs.com/package/duck-query)  
