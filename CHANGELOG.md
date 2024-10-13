@@ -1,5 +1,11 @@
 # duck-query
 
+## 0.12.0
+
+### Minor Changes
+
+- 4446b0c: fix renders and added enabled and revalidating fixes
+
 ## 0.11.4
 
 ### Patch Changes
