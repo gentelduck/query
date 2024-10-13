@@ -11,7 +11,7 @@ export type CacheEntry = {
 interface QueryCacheType {
     get(key: string): CacheEntry | null;
     build(key: string, value: CacheEntry): void;
-    remove(key: string, gcTime: number): void;
+    remove(key: string): void;
     clear(): void;
 }
 
@@ -26,9 +26,9 @@ export class QueryCache implements QueryCacheType {
         this.queries.set(key, value);
     }
 
-    public remove(key: string, gcTime: number) {
+    public remove(key: string) {
         const entry = this.queries.get(key);
-        if (entry && Date.now() - entry.timestamp! > gcTime) {
+        if (entry) {
             this.queries.delete(key);
         }
     }

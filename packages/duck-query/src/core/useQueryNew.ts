@@ -26,10 +26,11 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
         retry = 4,
         retryDelay = 1000,
         refetchOnWindowFocus = true,
+        enabled = true,
     } = options as QueryOptions<T>;
 
     // State
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(enabled ? true : false);
     const [isError, setIsError] = useState<boolean>(false);
     const [isStale, setIsStale] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,46 +39,61 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
     const retriesRef = useRef(0);
     const hasFetchedOnce = useRef(false);
     const key = useMemo(() => queryKey[0] as string, [queryKey]);
-    const params = useMemo(() => queryKey[1] || {}, [queryKey]);
-    const queryKeyParam = useMemo(() => [key, params], [key, params]);
+    const params = useMemo(() => queryKey[1] || {}, [JSON.stringify(queryKey)]);
     const { data, setData, queryCache } = useFullQueryClient();
 
+
     // Methods
-    const refetch = useCallback(() => {
+    const refetch = useCallback(async () => {
         if (hasFetchedOnce.current) {
             setIsLoading(true);
+            await queryFn({ queryKey: [key, params] }).then((result) => {
+                queryCache.build(key, {
+                    result,
+                    timestamp: Date.now(),
+                    queryFn,
+                    args: [key, params],
+                });
+                setData(key, {
+                    result,
+                    timestamp: Date.now(),
+                    queryFn,
+                    args: [key, params],
+                });
+            });
+            setIsLoading(false);
             setIsError(false);
             setIsStale(true);
-            fetcher();
         }
-    }, []);
+    }, [key, params, queryFn]);
 
     const checkIsStale = useCallback(() => {
+        if (!enabled) return;
         const currentTime = Date.now();
         const lastFetchedTime = queryCache.get(key)?.timestamp;
         const isStaleData =
             !lastFetchedTime || currentTime - lastFetchedTime > staleTime;
         setIsStale(isStaleData);
         return isStaleData;
-    }, [key, queryCache, staleTime]);
+    }, [enabled, key, queryCache, staleTime]);
+
 
     const fetcher = useCallback(async () => {
         const existingEntry = queryCache.get(key);
-
-        if (!existingEntry?.promise || existingEntry?.args !== queryKeyParam) {
-            const promise = queryFn({ queryKey: queryKeyParam })
+        if (!existingEntry?.promise) {
+            const promise = queryFn({ queryKey: [key, params] })
                 .then((result) => {
                     queryCache.build(key, {
                         result,
                         timestamp: Date.now(),
                         queryFn,
-                        args: queryKeyParam,
+                        args: [key, params],
                     });
                     setData(key, {
                         result,
                         timestamp: Date.now(),
                         queryFn,
-                        args: queryKeyParam,
+                        args: [key, params],
                     });
                     setIsLoading(false);
                 })
@@ -91,40 +107,31 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
                 ...existingEntry,
                 promise,
                 queryFn,
-                args: queryKeyParam,
+                args: [key, params],
             });
         }
 
         return queryCache.get(key)?.promise;
-    }, [key, queryCache, queryFn, queryKeyParam, setData]);
+    }, [key, params, queryCache, queryFn, setData]);
 
     const retryFetch = useCallback(async () => {
+        if (!enabled) return;
         if (retriesRef.current < (typeof retry === "number" ? retry : 4)) {
             await wait(retryDelay);
             retriesRef.current += 1;
 
             try {
-                await queryFn({ queryKey: queryKeyParam });
+                await queryFn({ queryKey: [key, params] });
                 setIsError(false);
             } catch (err) {
                 retryFetch();
                 throw err;
             }
         } else {
-            console.error("Max retries reached.");
             setIsError(true);
         }
-    }, [queryFn, retry, retryDelay]);
+    }, [enabled, key, params, queryFn, retry, retryDelay]);
 
-    useEffect(() => {
-        if (queryKeyParam) {
-            const cachedQuery = queryCache.get(key);
-            queryCache.build(key, {
-                ...cachedQuery,
-                args: queryKeyParam,
-            });
-        }
-    }, [queryKeyParam]);
 
     useEffect(() => {
         if (isError) {
@@ -133,6 +140,8 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
     }, [isError]);
 
     useEffect(() => {
+        if (!enabled) return;
+
         const cachedEntry = queryCache.get(key);
         const shouldFetch = !cachedEntry || checkIsStale();
 
@@ -143,7 +152,7 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
                 setIsLoading(false);
             }
 
-            if (!hasFetchedOnce.current || queryKeyParam !== cachedEntry?.args) {
+            if (!hasFetchedOnce.current) {
                 fetcher();
                 hasFetchedOnce.current = true;
             }
@@ -152,7 +161,7 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
                 result: cachedEntry.result as T,
                 timestamp: Date.now(),
                 queryFn,
-                args: queryKeyParam || {},
+                args: [key, params],
             });
             setIsLoading(false);
         }
@@ -165,26 +174,16 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
 
         if (gcTime) {
             gcTimeRef.current = setTimeout(() => {
-                queryCache.remove(key, gcTime);
+                queryCache.remove(key);
             }, gcTime);
         }
         return () => {
             if (staleTimeoutRef.current) clearTimeout(staleTimeoutRef.current);
             if (gcTimeRef.current) clearTimeout(gcTimeRef.current);
         };
-    }, [gcTime, key, staleTime, queryCache]);
+    }, [gcTime, key, staleTime, queryCache, enabled]);
 
-    useEffect(() => {
-        const cachedQuery = queryCache.get(key);
-        queryCache.remove(key, gcTime);
-        if (cachedQuery?.args !== queryKeyParam) {
-            queryCache.build(key, {
-                ...cachedQuery,
-                args: queryKeyParam,
-            });
-            fetcher();
-        }
-    }, [queryKeyParam, fetcher, queryCache, key]);
+
 
     useEffect(() => {
         if (refetchOnWindowFocus) {
@@ -194,7 +193,7 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
                     isStale &&
                     navigator.onLine
                 ) {
-                    queryFn({ queryKey: queryKeyParam });
+                    queryFn({ queryKey: [key, params] });
                 }
             };
 
@@ -203,7 +202,7 @@ export function useQueryNew<T>(options: QueryOptions<T>) {
                 document.removeEventListener("visibilitychange", handleVisibilityChange);
             };
         }
-    }, [key, refetchOnWindowFocus, isStale, queryFn, queryKeyParam]);
+    }, [key, refetchOnWindowFocus, isStale, queryFn, [key, params]]);
 
     return {
         data: data[key] as T | undefined,

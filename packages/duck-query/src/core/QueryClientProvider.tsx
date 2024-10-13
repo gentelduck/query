@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useContext, createContext, useState } from "react";
+import React, { useContext, createContext, useState, useCallback } from "react";
 import { CacheEntry, QueryCache } from "./QueryCache";
-import { QueryKey } from "./useQueryNew";
 import { QueryClientConfig } from "./QueryClient";
+import { QueryKey } from "./useQueryNew";
 
 export type QueryClient = {
     invalidateQueries: ({ queryKey }: { queryKey: QueryKey }) => void;
@@ -15,23 +15,20 @@ export interface FullQueryClient extends QueryClient {
     queryCache: QueryCache;
 }
 
-export interface QueryClientProviderProps {
+interface QueryClientProviderProps {
     children?: React.ReactNode;
-    client: QueryClientConfig
+    client: QueryClientConfig;
 }
 
-export const QueryClientContext = createContext<QueryClient | undefined>(undefined);
+const QueryClientContext = createContext<QueryClient | undefined>(undefined);
 export const FullQueryClientContext = createContext<FullQueryClient | undefined>(undefined);
-
 
 export function QueryClientProvider({ children, client }: QueryClientProviderProps) {
 
-    if (!client) throw new Error("No QueryClient set, use QueryClientProvider to set one")
+    if (!client) throw new Error("No QueryClient set, use QueryClientProvider to set one");
 
-    const [data, setQueryData] = useState({});
-
-    const queryCache = client.queryCache
-
+    const [data, setQueryData] = useState<Record<string, any>>({});
+    const queryCache = client.queryCache;
     const setData = (queryKey: string, cachedEntry: CacheEntry) => {
         setQueryData(prev => ({ ...prev, [queryKey]: cachedEntry.result }));
         queryCache.build(queryKey, {
@@ -42,24 +39,27 @@ export function QueryClientProvider({ children, client }: QueryClientProviderPro
         });
     };
 
-    const invalidateQueries = ({ queryKey }: { queryKey?: QueryKey } = { queryKey: [] }) => {
-        if (!queryKey || queryKey.length === 0) {
-            return;
+
+
+    const invalidateQueries = useCallback(({ queryKey }: { queryKey?: QueryKey } = { queryKey: [] }) => {
+        if (queryKey) {
+            queryKey.forEach(key => {
+                const cachedEntry = queryCache.get(key as string);
+                const queryFn = cachedEntry?.queryFn;
+                if (queryFn && typeof queryFn === "function") {
+                    queryFn({ queryKey: cachedEntry?.args }).then(res => {
+                        queryCache.build(key as string, {
+                            ...cachedEntry,
+                            result: res
+                        });
+                        setQueryData(prev => ({ ...prev, [key as string]: res }));
+                    });
+                }
+                queryCache.remove(key as string);
+            });
         }
-        queryKey.forEach(key => {
-            const cachedEntry = queryCache.get(key as string);
-            const queryFn = cachedEntry?.queryFn;
+    }, [queryCache, setQueryData]);
 
-            if (queryFn && queryKey && typeof queryFn === "function") {
-                queryFn({ queryKey }).then(res => {
-                    setQueryData(prev => ({ ...prev, [key as string]: res }));
-                    queryCache.build(key as string, { result: res, queryFn, args: queryKey as any, timestamp: Date.now() });
-                });
-            }
-
-            queryCache.remove(queryKey[0] as string, 0)
-        });
-    };
 
     const fullQueryClient: FullQueryClient = {
         data,
@@ -76,4 +76,3 @@ export function QueryClientProvider({ children, client }: QueryClientProviderPro
         </QueryClientContext.Provider>
     );
 }
-
